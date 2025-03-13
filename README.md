@@ -1,3 +1,7 @@
+
+# install requirements
+python -m pip install -r requirements.txt
+
 # Holy Hack - repo team biomeds
 
 Welcome to your personal Holy Hack GitHub repository! This serves as a central hub for submitting your code to be reviewed during the judging sessions. You should modify this README file to better explain your project to the judges, making it easier for them to understand your work.
