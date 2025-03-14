@@ -96,16 +96,14 @@ class Ledger:
             writer = csv.writer(file)
             writer.writerow([timestamp, labels, supplier, receiver, parameter, value])
 
-    def get_company_contract(self, account=None, company=None, supplier=None, receiver=None):
+    def get_company_contract(self, acc=None, supplier=None, receiver=None):
         """
         Retrieve contract data from the contracts ledger.
 
         Args:
             account: Account requesting the data (for permission checking)
-            company: Company to search for (as supplier or receiver)
             supplier: Filter by specific supplier
             receiver: Filter by specific receiver
-            priority: Filter by priority level
 
         Returns:
             Matching contract data or "Not found"
@@ -122,14 +120,13 @@ class Ledger:
                     timestamp, labels, sup, rec, amount, prio = row
 
                     # Check if row matches search criteria
-                    matches_company = not company or (company == sup or company == rec)
                     matches_supplier = not supplier or supplier == sup
                     matches_receiver = not receiver or receiver == rec
                     #matches_priority = not priority or str(priority) == prio
 
                     # Only return data if the requesting account has permission
-                    if matches_company and matches_supplier and matches_receiver:
-                        if account and (account in labels):
+                    if matches_supplier and matches_receiver:
+                        if acc and (acc in labels):
                             # Convert amount to float for consistency
                             data = row
                             break
@@ -175,11 +172,12 @@ class Ledger:
 # ledger.print_ledger()
 ledger = Ledger()
 
-#base 
+# base 
 @app.route('/')
 def hello_world():
-    return 'Hello! This is this API.'
+    return 'Hello! This is an API.'
 
+# endpoint - add sensitive company data
 @app.route('/add_company_data', methods=['POST'])
 def add_company_data():
     data = request.json
@@ -191,18 +189,21 @@ def add_company_data():
     ledger.add_company_data(labels, account, parameter, amount)
     return jsonify({"message": "Data added successfully"}), 200
 
-@app.route('/add_company_contracts', methods=['POST'])
-def add_company_contracts():
+# endpoint - add contract between companies
+@app.route('/add_company_contract', methods=['POST'])
+def add_company_contract():
     data = request.json
     labels = data['labels']
     supplier = data['supplier']
     receiver = data['receiver']
     parameter = data['parameter']
     value = data['value']
-
+    print("Labels")
     ledger.add_company_contract(labels, supplier, receiver, parameter, value)
     return jsonify({"message": "Data added successfully"}), 200
 
+
+# endpoint - get sensitive company data
 @app.route('/get_company_data', methods=['GET'])
 def get_company_data():
     account = request.args.get('account')
@@ -212,15 +213,14 @@ def get_company_data():
     result = ledger.get_company_data(account, company, search)
     return jsonify({"data": result}), 200
 
-
+# endpoint - get contract between companies
 @app.route('/get_company_contract', methods=['GET'])
 def get_company_contracts():
     account = request.args.get('account')
-    company = request.args.get('company')
     supplier = request.args.get('supplier')
     receiver = request.args.get('receiver')
 
-    result = ledger.get_company_contract(account, company, supplier, receiver)
+    result = ledger.get_company_contract(account, supplier, receiver)
     return jsonify({"data": result}), 200
 
 if __name__ == '__main__':

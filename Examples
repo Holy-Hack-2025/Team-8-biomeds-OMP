@@ -1,4 +1,6 @@
 
+
+# add company data
 {
     "labels": ["acc1"],
     "account": "acc1",
@@ -6,6 +8,16 @@
     "amount": 100
 }
 
+#add company contract
+{
+    "labels": ["acc1", "acc2"],
+    "supplier": "acc1",
+    "receiver": "acc2",
+    "parameter": "delivery",
+    "value": 200
+}
 
 
 get_company_data?account=acc1&search_parameter=stock
+
+get_company_contract?account=acc1&supplier=acc1&receiver=acc2
