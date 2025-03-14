@@ -137,7 +137,7 @@ class Ledger:
 
         return data
 
-    def calculate_fair_distribution(self):
+    def calculate_output(self):
         # Get company A's available materials
         company_a_data = {}
         company_b_data = {}
@@ -287,7 +287,7 @@ def simulate_distribution():
     ledger.add_company_contract(['A', 'C'], 'A', 'C', 'vaccines', 200)  # A contracts with C for 100 vaccines
 
     # Calculate fair distribution
-    result = ledger.calculate_fair_distribution()
+    result = ledger.calculate_output()
 
     # Save only the recommended vaccines to order for each company
     for allocation in result['allocations']:
@@ -309,7 +309,7 @@ def visualize():
         return "Please specify a company parameter (A, B, or C)", 400
 
     # Calculate distribution data
-    result = ledger.calculate_fair_distribution()
+    result = ledger.calculate_output()
 
     # Filter allocations based on company
     filtered_allocations = []
