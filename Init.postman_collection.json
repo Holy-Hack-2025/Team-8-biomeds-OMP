@@ -1,0 +1,472 @@
+{
+	"info": {
+		"_postman_id": "4e5d3c05-6fe5-4769-9504-c1c2d9150173",
+		"name": "Init",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43110382"
+	},
+	"item": [
+		{
+			"name": "init",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\"],\r\n    \"account\": \"A\",\r\n    \"parameter\": \"materials\",\r\n    \"amount\": 300\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/add_company_data",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"add_company_data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"B\"],\r\n    \"account\": \"B\",\r\n    \"parameter\": \"storage\",\r\n    \"amount\": 500\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/add_company_data",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"add_company_data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"C\"],\r\n    \"account\": \"C\",\r\n    \"parameter\": \"storage\",\r\n    \"amount\": 200\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/add_company_data",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"add_company_data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add1_c",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\", \"B\"],\r\n    \"supplier\": \"A\",\r\n    \"receiver\": \"B\",\r\n    \"parameter\": \"vaccines\",\r\n    \"value\": 400\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/add_company_contracts",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"add_company_contracts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add2_c",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\", \"C\"],\r\n    \"supplier\": \"A\",\r\n    \"receiver\": \"C\",\r\n    \"parameter\": \"vaccines\",\r\n    \"value\": 200\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/add_company_contracts",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"add_company_contracts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getstorage",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\", \"C\"],\r\n    \"supplier\": \"A\",\r\n    \"receiver\": \"C\",\r\n    \"parameter\": \"vaccines\",\r\n    \"value\": 200\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/get_company_data?account=B&company=B&search=storage",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"get_company_data"
+					],
+					"query": [
+						{
+							"key": "account",
+							"value": "B"
+						},
+						{
+							"key": "company",
+							"value": "B"
+						},
+						{
+							"key": "search",
+							"value": "storage"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getstorage2",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\", \"C\"],\r\n    \"supplier\": \"A\",\r\n    \"receiver\": \"C\",\r\n    \"parameter\": \"vaccines\",\r\n    \"value\": 200\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/get_company_data?account=A&company=B&search=storage",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"get_company_data"
+					],
+					"query": [
+						{
+							"key": "account",
+							"value": "A"
+						},
+						{
+							"key": "company",
+							"value": "B"
+						},
+						{
+							"key": "search",
+							"value": "storage"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getconstraints",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\", \"C\"],\r\n    \"supplier\": \"A\",\r\n    \"receiver\": \"C\",\r\n    \"parameter\": \"vaccines\",\r\n    \"value\": 200\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/get_company_contract?account=C&supplier=A&receiver=C",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"get_company_contract"
+					],
+					"query": [
+						{
+							"key": "account",
+							"value": "C"
+						},
+						{
+							"key": "supplier",
+							"value": "A"
+						},
+						{
+							"key": "receiver",
+							"value": "C"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getconstraints2",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\", \"C\"],\r\n    \"supplier\": \"A\",\r\n    \"receiver\": \"C\",\r\n    \"parameter\": \"vaccines\",\r\n    \"value\": 200\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/get_company_contract?account=C&supplier=A&receiver=B",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"get_company_contract"
+					],
+					"query": [
+						{
+							"key": "account",
+							"value": "C"
+						},
+						{
+							"key": "supplier",
+							"value": "A"
+						},
+						{
+							"key": "receiver",
+							"value": "B"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getresult",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\", \"C\"],\r\n    \"supplier\": \"A\",\r\n    \"receiver\": \"C\",\r\n    \"parameter\": \"vaccines\",\r\n    \"value\": 200\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/get_result?account=B",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"get_result"
+					],
+					"query": [
+						{
+							"key": "account",
+							"value": "B"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Visualize",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"labels\": [\"A\", \"C\"],\r\n    \"supplier\": \"A\",\r\n    \"receiver\": \"C\",\r\n    \"parameter\": \"vaccines\",\r\n    \"value\": 200\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/visualize?company=A",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"",
+						"visualize"
+					],
+					"query": [
+						{
+							"key": "company",
+							"value": "A"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
