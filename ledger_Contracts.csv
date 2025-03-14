@@ -1,1 +1,3 @@
 timestamp,labels,Supplier,Receiver,amount,Priority
+2025-03-14 14:53:57,"['A', 'B']",A,B,vaccines,400
+2025-03-14 14:54:03,"['A', 'C']",A,C,vaccines,200

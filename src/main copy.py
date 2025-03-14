@@ -214,6 +214,32 @@ class Ledger:
             'allocations': results
         }
 
+    # def export_contracts_to_csv(self, output_filename='ledger_Contracts.csv'):
+    #     """
+    #     Export contracts data to a file with .csv extension
+
+    #     Args:
+    #         output_filename: The name of the output file (default: ledger_Contracts.csv)
+    #     """
+    #     # Read data from the existing contracts CSV file
+    #     contracts_data = []
+    #     try:
+    #         with open(self.contracts_filename, mode='r', newline='') as file:
+    #             reader = csv.reader(file)
+    #             header = next(reader)  # Get header
+    #             contracts_data.append(header)  # Add header to data
+    #             for row in reader:
+    #                 contracts_data.append(row)
+    #     except FileNotFoundError:
+    #         # If the contracts file doesn't exist, use the default header
+    #         contracts_data.append(['timestamp', 'labels', 'Supplier', 'Receiver', 'amount', 'Priority'])
+
+    #     # Write data to the .csv file
+    #     with open(output_filename, mode='w', newline='') as file:
+    #         writer = csv.writer(file)
+    #         for row in contracts_data:
+    #             writer.writerow(row)
+    #     print(f"Contracts data exported to {output_filename}")
     
 
 
@@ -267,8 +293,6 @@ def get_company_contracts():
 
     result = ledger.get_company_contract(account, company, supplier, receiver)
     return jsonify({"data": result}), 200
-
-
 
 
 @app.route('/simulate_distribution', methods=['GET'])

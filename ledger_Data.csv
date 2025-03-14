@@ -1,1 +1,8 @@
 timestamp,labels,account,parameter,amount
+2025-03-14 14:26:46,{'acc1'},acc1,stock,100
+2025-03-14 14:36:11,{'A'},A,materials,300
+2025-03-14 14:36:16,{'B'},B,storage,500
+2025-03-14 14:36:20,{'C'},C,storage,200
+2025-03-14 14:53:36,{'A'},A,materials,300
+2025-03-14 14:53:43,{'B'},B,storage,500
+2025-03-14 14:53:49,{'C'},C,storage,200
