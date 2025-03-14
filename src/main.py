@@ -25,7 +25,8 @@ class Ledger:
         # Create the CSV file with header if it doesn't exist
         try:
             with open(self.contracts_filename, mode='r') as file:
-                self.clear_csv(self.contracts_filename)  # file exists
+                pass
+                #self.clear_csv(self.contracts_filename)  # file exists
         except FileNotFoundError:
             self.create_ledger('contracts')
 
@@ -174,7 +175,6 @@ class Ledger:
                             'receiver': receiver,
                             'requested': float(value)
                         })
-
         # Calculate proportional distribution
         available_materials = company_a_data.get('materials', 0)
         total_storage = company_b_data.get('storage', 0) + company_c_data.get('storage', 0)
@@ -206,14 +206,29 @@ class Ledger:
                     'capacity': storage_capacity,
                     'fill_percentage': round((fair_amount / storage_capacity * 100 if storage_capacity > 0 else 0), 2)
                 })
-
         return {
             'available_materials': available_materials,
             'total_storage': total_storage,
             'total_requested': total_requested,
             'allocations': results
         }
+    
+    def get_result(self, acc):
+        # Calculate fair distribution
+        result = self.calculate_output()
+        output = "Not found"
+        # Save only the recommended vaccines to order for each company
+        print(result)
+        for allocation in result['allocations']:
+            print(allocation)
+            receiver = allocation['receiver']
+            recommended_vaccines = round(allocation['recommended vaccines to order'])
+            if allocation['receiver'] == acc:
+                output = round(allocation['recommended vaccines to order'])
+            # Save the recommended vaccines to order for each company
+            self.add_company_data([receiver], receiver, 'recommended_vaccines_to_order', recommended_vaccines)
 
+        return output
     
 
 
@@ -268,7 +283,11 @@ def get_company_contracts():
     result = ledger.get_company_contract(account, company, supplier, receiver)
     return jsonify({"data": result}), 200
 
-
+@app.route('/get_result', methods=['GET'])
+def get_result():
+    account = request.args.get('account')
+    result = ledger.get_result(account)
+    return jsonify({"recommended vaccines": result}), 200
 
 
 @app.route('/simulate_distribution', methods=['GET'])
