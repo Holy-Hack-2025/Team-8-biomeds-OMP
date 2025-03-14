@@ -1,3 +1,5 @@
+# Project overview
+This project presents the results for the 2025 AFT Holy Hack of the OMP case. The results contain an API that retrieves data from different companies, and based on this data estimates how much additional vaccines the companies should have to order. This way, in case of unforeseen production difficulties, companies further down the supply chain are still able to fulfill demand because they were warned about production difficulties higher up the supply chain. The only result that companies receive is that they should order additional vaccines. Therefore, the confidential data of companies remains safe.
 
 # install requirements
 python -m pip install -r requirements.txt
