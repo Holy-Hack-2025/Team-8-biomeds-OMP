@@ -203,7 +203,7 @@ class Ledger:
                 results.append({
                     'receiver': receiver,
                     'requested': requested,
-                    'recommended vaccines to order': storage_capacity-round(fair_amount, 0),
+                    'recommended vaccines to order from others': storage_capacity-round(fair_amount, 0),
                     'capacity': storage_capacity,
                     'fill_percentage': round((fair_amount / storage_capacity * 100 if storage_capacity > 0 else 0), 2)
                 })
@@ -315,11 +315,9 @@ def simulate_distribution():
     # Save only the recommended vaccines to order for each company
     for allocation in result['allocations']:
         receiver = allocation['receiver']
-        recommended_vaccines = round(allocation['recommended vaccines to order'])
+        recommended_vaccines = round(allocation['recommended vaccines to order from others'])
         # Save the recommended vaccines to order for each company
-        ledger.add_company_data([receiver], receiver, 'recommended_vaccines_to_order', recommended_vaccines)
-
-    print(ledger.get_company_data(account='B', search_parameter='recommended_vaccines_to_order'))
+        ledger.add_company_data([receiver], receiver, 'recommended_vaccines_to_order from others', recommended_vaccines)
 
     return jsonify(result), 200
 
@@ -408,8 +406,8 @@ def visualize():
                             backgroundColor: 'rgba(153, 102, 255, 0.6)',
                         }},
                         {{
-                            label: 'Recommended to Order',
-                            data: allocations.map(a => a["recommended vaccines to order"]),
+                            label: 'Recommended vaccines to order from others',
+                            data: allocations.map(a => a["recommended vaccines to order from others"]),
                             backgroundColor: 'rgba(255, 99, 132, 0.6)',
                         }}
                     ]
@@ -443,7 +441,7 @@ def visualize():
             resource_summary = f"""
                 <p>Your storage capacity: <strong>{company_allocation['capacity']}</strong></p>
                 <p>Vaccines you requested: <strong>{company_allocation['requested']}</strong></p>
-                <p>Recommended vaccines to order: <strong>{company_allocation['recommended vaccines to order']}</strong></p>
+                <p>Recommended vaccines to order from others: <strong>{company_allocation['recommended vaccines to order from others']}</strong></p>
                 <p>Your storage fill percentage: <strong>{company_allocation['fill_percentage']}%</strong></p>
             """
 
@@ -459,7 +457,7 @@ def visualize():
                 const companyChart = new Chart(ctx, {{
                     type: 'bar',
                     data: {{
-                        labels: ['Your Company'],
+                        labels: ['Vaccines and Co'],
                         datasets: [
                             {{
                                 label: 'Requested Vaccines',
@@ -472,8 +470,8 @@ def visualize():
                                 backgroundColor: 'rgba(153, 102, 255, 0.6)',
                             }},
                             {{
-                                label: 'Recommended to Order',
-                                data: [companyData["recommended vaccines to order"]],
+                                label: 'Recommended vacines to Order',
+                                data: [companyData["recommended vaccines to order from others"]],
                                 backgroundColor: 'rgba(255, 99, 132, 0.6)',
                             }}
                         ]
@@ -500,7 +498,7 @@ def visualize():
             </script>
             """
         else:
-            resource_summary = "<p>No data available for your company</p>"
+            resource_summary = "<p>No data available for Vaccines and Co</p>"
             charts = ""
 
     return html.format(
