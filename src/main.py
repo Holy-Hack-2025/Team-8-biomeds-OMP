@@ -112,7 +112,6 @@ def add_company_data():
     parameter = data['parameter']
     amount = data['amount']
 
-
     ledger.add_company_data(labels, account, parameter, amount)
     return jsonify({"message": "Data added successfully"}), 200
 
