@@ -46,20 +46,13 @@ class Ledger:
             writer = csv.writer(file)
             writer.writerow(header)
 
-    def add_companydata(self, account, parameter, amount):
-        labels = set(account)
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        with open(self.filename, mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([timestamp, labels, account, description, amount])
+    def add_companydata(self, labels, account, parameter, amount):
+            timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            with open(self.data_filename, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([timestamp, labels, account, parameter, amount])
 
-def add_companydata(self, labels, account, parameter, amount):
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        with open(self.data_filename, mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([timestamp, labels, account, parameter, amount])
-
-def get_companydata(self, account=None, company = None, search_parameter=None):
+    def get_companydata(self, account= None, company = None, search_parameter=None):
         data = "Not found"
         with open(self.data_filename, mode='r') as file:
             reader = csv.reader(file)
@@ -91,6 +84,6 @@ def get_companydata(self, account=None, company = None, search_parameter=None):
 # Example usage
 ledger = Ledger()
 ledger.add_companydata(set(['Account1']),'Account1', 'stock', 1000)
-print(ledger.get_companydata('Account1', 'Account1', 'stock'))
+print(ledger.get_companydata('Account1','Account1','stock'))
 # print(ledger.get_transactions('Account 1'))
 #ledger.print_ledger()
