@@ -1,27 +1,59 @@
 import csv
 import datetime
-
+import os
 
 class Ledger:
     def __init__(self, filename='ledger.csv'):
-        self.filename = filename
+        # Extract the base name from the input filename (without extension)
+        base_filename = os.path.splitext(filename)[0]
+        
+        # Create new filenames based on the base name
+        self.data_filename = f"{base_filename}_Data.csv"
+        self.contracts_filename = f"{base_filename}_Contracts.csv"
         # Create the CSV file with header if it doesn't exist
         try:
-            with open(self.filename, mode='r') as file:
-                pass  # file exists
+            with open(self.data_filename, mode='r') as file:
+                self.clear_csv(self.data_filename)  # file exists
+                with open(filename, mode='w', newline='') as file:
+                    writer = csv.writer(file)
+                    header = ['timestamp', 'labels', 'account', 'parameter', 'amount']
+                    writer.writerow(header)
         except FileNotFoundError:
-            self.create_ledger()
+            self.create_ledger('data')
+        # Create the CSV file with header if it doesn't exist
+        try:
+            with open(self.contracts_filename, mode='r') as file:
+                self.clear_csv(self.contracts_filename)  # file exists
+                with open(filename, mode='w', newline='') as file:
+                    writer = csv.writer(file)
+                    header = ['timestamp', 'labels', 'Supplier', 'Receiver' 'amount', 'Priority']
+                    writer.writerow(header)
+        except FileNotFoundError:
+            self.create_ledger('contracts')
 
-    def create_ledger(self):
-        with open(self.filename, mode='w', newline='') as file:
+    def clear_csv(self,filename):
+        # write mode ('w') to clear its contents
+        with open(filename, mode='w', newline='') as file:
+            pass 
+
+    def create_ledger(self, key ):
+        match key:
+            case "data":
+                filename = self.data_filename
+                header = ['timestamp', 'labels', 'account', 'parameter', 'amount']
+            case "contracts":
+                filename = self.contracts_filename
+                header = ['timestamp', 'labels', 'Supplier', 'Receiver' 'amount', 'Priority']
+        with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['timestamp', 'account', 'description', 'amount'])
+            writer.writerow(header)
 
     def add_transaction(self, account, description, amount):
+        labels = set(account)
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open(self.filename, mode='a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([timestamp, account, description, amount])
+            writer.writerow([timestamp, labels, account, description, amount])
 
     def get_transactions(self, account=None, min_amount=None, max_amount=None):
             transactions = []
@@ -40,6 +72,12 @@ class Ledger:
                     transactions.append(row)
             return transactions
     
+    def add_contract(self, account1, account2, amount_materials):
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        with open(self.filename, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([timestamp, account, description, amount])
+
 
     def print_ledger(self):
         transactions = self.get_transactions()
@@ -49,7 +87,7 @@ class Ledger:
 
 # Example usage
 ledger = Ledger()
-ledger.add_transaction('Account 1', 'Payment Received', 1000)
-ledger.add_transaction('Account 2', 'Payment Sent', -500)
-ledger.get_transactions('Account 1')
-ledger.print_ledger()
+# ledger.add_transaction('Account 1', 'Payment Received', 1000)
+# ledger.add_transaction('Account 2', 'Payment Sent', -500)
+# print(ledger.get_transactions('Account 1'))
+#ledger.print_ledger()
