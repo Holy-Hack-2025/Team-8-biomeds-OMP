@@ -46,24 +46,26 @@ class Ledger:
             writer = csv.writer(file)
             writer.writerow(header)
 
-    def add_companydata(self, account, parameter, amount):
-        labels = set(account)
+    def add_companydata(self, labels, account, parameter, amount):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open(self.data_filename, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([timestamp, labels, account, parameter, amount])
 
-    def get_companydata(self, account=None, company = None, search_parameter=None, max_amount=None):
-            data = []
-            with open(self.filename, mode='r') as file:
+    def get_companydata(self, account=None, company = None, search_parameter=None):
+            data = "Not found"
+            with open(self.data_filename, mode='r') as file:
                 reader = csv.reader(file)
                 next(reader)  # Skip header row
+                reader = list(csv.reader(file))
                 for row in reversed(reader):
                     timestamp, labels, acc, parameter, amount = row
                     amount = float(amount)  # Convert amount to a float
                     if parameter == search_parameter:
-                        if account and account in labels:
+                        if account and (account in labels):
                              data = row
+                        else:
+                            print("No Permission")
             return data
     
     # def add_contract(self, account1, account2, amount_materials):
@@ -81,7 +83,7 @@ class Ledger:
 
 # Example usage
 ledger = Ledger()
-ledger.add_companydata('Account 1', 'stock', 1000)
-# ledger.add_transaction('Account 2', 'Payment Sent', -500)
+ledger.add_companydata(set(['Account1']),'Account1', 'stock', 1000)
+print(ledger.get_companydata('Account1', 'Account1', 'stock'))
 # print(ledger.get_transactions('Account 1'))
 #ledger.print_ledger()
