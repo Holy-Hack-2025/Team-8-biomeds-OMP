@@ -1,4 +1,4 @@
-#Write a function that calculates a number and multiplies it by 2
+# Write a function that calculates a number and multiplies it by 2
 # and then adds 3 to the result. The function should take one argument,
 # which is the number to be multiplied and added to.
 def calculate_and_modify(number):
