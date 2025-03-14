@@ -95,14 +95,16 @@ class Ledger:
             writer = csv.writer(file)
             writer.writerow([timestamp, labels, supplier, receiver, parameter, value])
 
-    def get_company_contract(self, acc=None, supplier=None, receiver=None):
+    def get_company_contract(self, account=None, company=None, supplier=None, receiver=None):
         """
         Retrieve contract data from the contracts ledger.
 
         Args:
             account: Account requesting the data (for permission checking)
+            company: Company to search for (as supplier or receiver)
             supplier: Filter by specific supplier
             receiver: Filter by specific receiver
+            priority: Filter by priority level
 
         Returns:
             Matching contract data or "Not found"
@@ -119,13 +121,14 @@ class Ledger:
                     timestamp, labels, sup, rec, amount, prio = row
 
                     # Check if row matches search criteria
+                    matches_company = not company or (company == sup or company == rec)
                     matches_supplier = not supplier or supplier == sup
                     matches_receiver = not receiver or receiver == rec
                     #matches_priority = not priority or str(priority) == prio
 
                     # Only return data if the requesting account has permission
-                    if matches_supplier and matches_receiver:
-                        if acc and (acc in labels):
+                    if matches_company and matches_supplier and matches_receiver:
+                        if account and (account in labels):
                             # Convert amount to float for consistency
                             data = row
                             break
@@ -133,6 +136,83 @@ class Ledger:
                             data = "No Permission"
 
         return data
+
+    def calculate_fair_distribution(self):
+        # Get company A's available materials
+        company_a_data = {}
+        company_b_data = {}
+        company_c_data = {}
+
+        # Read all data from the data file
+        with open(self.data_filename, mode='r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header row
+            for row in reader:
+                if len(row) >= 5:
+                    _, labels_str, account, parameter, amount = row
+                    # Convert string representation of set to actual set
+                    labels = eval(labels_str) if labels_str else set()
+
+                    if 'A' in labels and parameter == 'materials':
+                        company_a_data['materials'] = float(amount)
+                    elif 'B' in labels and parameter == 'storage':
+                        company_b_data['storage'] = float(amount)
+                    elif 'C' in labels and parameter == 'storage':
+                        company_c_data['storage'] = float(amount)
+
+        # Get contract data
+        contracts = []
+        with open(self.contracts_filename, mode='r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header row
+            for row in reader:
+                if len(row) >= 6:
+                    _, labels_str, supplier, receiver, parameter, value = row
+                    if supplier == 'A' and parameter == 'syringes':
+                        contracts.append({
+                            'supplier': supplier,
+                            'receiver': receiver,
+                            'requested': float(value)
+                        })
+
+        # Calculate proportional distribution
+        available_materials = company_a_data.get('materials', 0)
+        total_storage = company_b_data.get('storage', 0) + company_c_data.get('storage', 0)
+        total_requested = sum(c['requested'] for c in contracts)
+
+        results = []
+
+        if total_storage > 0 and total_requested > 0:
+            # Calculate distribution proportionally to storage
+            for contract in contracts:
+                receiver = contract['receiver']
+                requested = contract['requested']
+
+                if receiver == 'B':
+                    storage_capacity = company_b_data.get('storage', 0)
+                elif receiver == 'C':
+                    storage_capacity = company_c_data.get('storage', 0)
+                else:
+                    storage_capacity = 0
+
+                # Calculate proportion based on storage capacity
+                proportion = storage_capacity / total_storage
+                fair_amount = min(available_materials * proportion, requested)
+
+                results.append({
+                    'receiver': receiver,
+                    'requested': requested,
+                    'recommended syringes to order': storage_capacity-round(fair_amount, 0),
+                    'capacity': storage_capacity,
+                    'fill_percentage': round((fair_amount / storage_capacity * 100 if storage_capacity > 0 else 0), 2)
+                })
+
+        return {
+            'available_materials': available_materials,
+            'total_storage': total_storage,
+            'total_requested': total_requested,
+            'allocations': results
+        }
 
     # def export_contracts_to_csv(self, output_filename='ledger_Contracts.csv'):
     #     """
@@ -165,12 +245,11 @@ class Ledger:
 
 ledger = Ledger()
 
-# base 
+#base 
 @app.route('/')
 def hello_world():
-    return 'Hello! This is an API.'
+    return 'Hello! This is the biomeds Holy Hack 2025 API.'
 
-# endpoint - add sensitive company data
 @app.route('/add_company_data', methods=['POST'])
 def add_company_data():
     data = request.json
@@ -182,21 +261,18 @@ def add_company_data():
     ledger.add_company_data(labels, account, parameter, amount)
     return jsonify({"message": "Data added successfully"}), 200
 
-# endpoint - add contract between companies
-@app.route('/add_company_contract', methods=['POST'])
-def add_company_contract():
+@app.route('/add_company_contracts', methods=['POST'])
+def add_company_contracts():
     data = request.json
     labels = data['labels']
     supplier = data['supplier']
     receiver = data['receiver']
     parameter = data['parameter']
     value = data['value']
-    print("Labels")
+
     ledger.add_company_contract(labels, supplier, receiver, parameter, value)
     return jsonify({"message": "Data added successfully"}), 200
 
-
-# endpoint - get sensitive company data
 @app.route('/get_company_data', methods=['GET'])
 def get_company_data():
     account = request.args.get('account')
@@ -205,15 +281,37 @@ def get_company_data():
     result = ledger.get_company_data(account, search)
     return jsonify({"data": result}), 200
 
-# endpoint - get contract between companies
+
 @app.route('/get_company_contract', methods=['GET'])
 def get_company_contracts():
     account = request.args.get('account')
+    company = request.args.get('company')
     supplier = request.args.get('supplier')
     receiver = request.args.get('receiver')
 
-    result = ledger.get_company_contract(account, supplier, receiver)
+    result = ledger.get_company_contract(account, company, supplier, receiver)
     return jsonify({"data": result}), 200
+
+
+@app.route('/simulate_distribution', methods=['GET'])
+def simulate_distribution():
+    # Clear existing data
+    ledger.clear_csv(ledger.data_filename)
+    ledger.clear_csv(ledger.contracts_filename)
+
+    # Add company data
+    ledger.add_company_data(['A'], 'A', 'materials', 300)  # Company A has materials for 300 syringes
+    ledger.add_company_data(['B'], 'B', 'storage', 500)  # Company B has storage for 500 syringes
+    ledger.add_company_data(['C'], 'C', 'storage', 200)  # Company C has storage for 200 syringes
+
+    # Add contracts
+    ledger.add_company_contract(['A', 'B'], 'A', 'B', 'syringes', 400)  # A contracts with B for 400 syringes
+    ledger.add_company_contract(['A', 'C'], 'A', 'C', 'syringes', 200)  # A contracts with C for 100 syringes
+
+    # Calculate fair distribution
+    result = ledger.calculate_fair_distribution()
+
+    return jsonify(result), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

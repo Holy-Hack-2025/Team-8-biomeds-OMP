@@ -53,7 +53,6 @@ class Ledger:
             supplier: The supplier company name
             receiver: The receiver company name
             amount: Contract amount
-            priority: Priority level of the contract
         """
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -64,7 +63,7 @@ class Ledger:
             writer = csv.writer(file)
             writer.writerow([timestamp, labels, supplier, receiver, parameter, value])
 
-    def get_company_contract(self, account=None, company=None, supplier=None, receiver=None, priority=None):
+    def get_company_contract(self, account=None, company=None, supplier=None, receiver=None):
         """
         Retrieve contract data from the contracts ledger.
 
@@ -73,7 +72,6 @@ class Ledger:
             company: Company to search for (as supplier or receiver)
             supplier: Filter by specific supplier
             receiver: Filter by specific receiver
-            priority: Filter by priority level
 
         Returns:
             Matching contract data or "Not found"
@@ -93,10 +91,9 @@ class Ledger:
                     matches_company = not company or (company == sup or company == rec)
                     matches_supplier = not supplier or supplier == sup
                     matches_receiver = not receiver or receiver == rec
-                    matches_priority = not priority or str(priority) == prio
 
                     # Only return data if the requesting account has permission
-                    if matches_company and matches_supplier and matches_receiver and matches_priority:
+                    if matches_company and matches_supplier and matches_receiver:
                         if account and (account in labels):
                             # Convert amount to float for consistency
                             data = row
@@ -124,7 +121,7 @@ class Ledger:
                     contracts_data.append(row)
         except FileNotFoundError:
             # If the contracts file doesn't exist, use the default header
-            contracts_data.append(['timestamp', 'labels', 'Supplier', 'Receiver', 'amount', 'Priority'])
+            contracts_data.append(['timestamp', 'labels', 'Supplier', 'Receiver', 'amount'])
 
         # Write data to the .csv file
         with open(output_filename, mode='w', newline='') as file:
