@@ -77,19 +77,95 @@ class Ledger:
                         print("No Permission")
         return data
     
+    def add_company_contract(self, labels, supplier, receiver, parameter, value):
+        """
+        Add a contract between a supplier and receiver to the contracts ledger
+
+        Args:
+            supplier: The supplier company name
+            receiver: The receiver company name
+            amount: Contract amount
+            priority: Priority level of the contract
+        """
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Create labels including both supplier and receiver
+        #labels = f"{supplier},{receiver}"
+
+        with open(self.contracts_filename, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([timestamp, labels, supplier, receiver, parameter, value])
+
+    def get_company_contract(self, account=None, company=None, supplier=None, receiver=None):
+        """
+        Retrieve contract data from the contracts ledger.
+
+        Args:
+            account: Account requesting the data (for permission checking)
+            company: Company to search for (as supplier or receiver)
+            supplier: Filter by specific supplier
+            receiver: Filter by specific receiver
+            priority: Filter by priority level
+
+        Returns:
+            Matching contract data or "Not found"
+        """
+        data = "Not found"
+
+        with open(self.contracts_filename, mode='r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header row
+            reader = list(csv.reader(file))
+
+            for row in reversed(reader):
+                if len(row) >= 6:  # Ensure we have all columns
+                    timestamp, labels, sup, rec, amount, prio = row
+
+                    # Check if row matches search criteria
+                    matches_company = not company or (company == sup or company == rec)
+                    matches_supplier = not supplier or supplier == sup
+                    matches_receiver = not receiver or receiver == rec
+                    #matches_priority = not priority or str(priority) == prio
+
+                    # Only return data if the requesting account has permission
+                    if matches_company and matches_supplier and matches_receiver:
+                        if account and (account in labels):
+                            # Convert amount to float for consistency
+                            data = row
+                            break
+                        else:
+                            print("No Permission")
+
+        return data
+
+    def export_contracts_to_csv(self, output_filename='ledger_Contracts.csv'):
+        """
+        Export contracts data to a file with .csv extension
+
+        Args:
+            output_filename: The name of the output file (default: ledger_Contracts.csv)
+        """
+        # Read data from the existing contracts CSV file
+        contracts_data = []
+        try:
+            with open(self.contracts_filename, mode='r', newline='') as file:
+                reader = csv.reader(file)
+                header = next(reader)  # Get header
+                contracts_data.append(header)  # Add header to data
+                for row in reader:
+                    contracts_data.append(row)
+        except FileNotFoundError:
+            # If the contracts file doesn't exist, use the default header
+            contracts_data.append(['timestamp', 'labels', 'Supplier', 'Receiver', 'amount', 'Priority'])
+
+        # Write data to the .csv file
+        with open(output_filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            for row in contracts_data:
+                writer.writerow(row)
+
+        print(f"Contracts data exported to {output_filename}")
     
-    # def add_contract(self, account1, account2, amount_materials):
-    #     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    #     with open(self.filename, mode='a', newline='') as file:
-    #         writer = csv.writer(file)
-    #         writer.writerow([timestamp, account, description, amount])
-
-
-    # def print_ledger(self):
-    #     transactions = self.get_transactions()
-    #     for transaction in transactions:
-    #         print(f"{transaction[0]} | {transaction[1]} | {transaction[2]} | {transaction[3]}")
-
 
 # Example usage
 # ledger = Ledger()
@@ -115,6 +191,18 @@ def add_company_data():
     ledger.add_company_data(labels, account, parameter, amount)
     return jsonify({"message": "Data added successfully"}), 200
 
+@app.route('/add_company_contracts', methods=['POST'])
+def add_company_contracts():
+    data = request.json
+    labels = data['labels']
+    supplier = data['supplier']
+    receiver = data['receiver']
+    parameter = data['parameter']
+    value = data['value']
+
+    ledger.add_company_contract(labels, supplier, receiver, parameter, value)
+    return jsonify({"message": "Data added successfully"}), 200
+
 @app.route('/get_company_data', methods=['GET'])
 def get_company_data():
     account = request.args.get('account')
@@ -122,6 +210,17 @@ def get_company_data():
     search = request.args.get('search')
 
     result = ledger.get_company_data(account, company, search)
+    return jsonify({"data": result}), 200
+
+
+@app.route('/get_company_contract', methods=['GET'])
+def get_company_contracts():
+    account = request.args.get('account')
+    company = request.args.get('company')
+    supplier = request.args.get('supplier')
+    receiver = request.args.get('receiver')
+
+    result = ledger.get_company_contract(account, company, supplier, receiver)
     return jsonify({"data": result}), 200
 
 if __name__ == '__main__':
