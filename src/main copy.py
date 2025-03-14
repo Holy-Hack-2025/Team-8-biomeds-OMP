@@ -25,8 +25,7 @@ class Ledger:
         # Create the CSV file with header if it doesn't exist
         try:
             with open(self.contracts_filename, mode='r') as file:
-                pass
-                #self.clear_csv(self.contracts_filename)  # file exists
+                self.clear_csv(self.contracts_filename)  # file exists
         except FileNotFoundError:
             self.create_ledger('contracts')
 
@@ -138,7 +137,7 @@ class Ledger:
 
         return data
 
-    def calculate_output(self):
+    def calculate_fair_distribution(self):
         # Get company A's available materials
         company_a_data = {}
         company_b_data = {}
@@ -175,6 +174,7 @@ class Ledger:
                             'receiver': receiver,
                             'requested': float(value)
                         })
+
         # Calculate proportional distribution
         available_materials = company_a_data.get('materials', 0)
         total_storage = company_b_data.get('storage', 0) + company_c_data.get('storage', 0)
@@ -202,33 +202,44 @@ class Ledger:
                 results.append({
                     'receiver': receiver,
                     'requested': requested,
-                    'recommended vaccines to order from others': storage_capacity-round(fair_amount, 0),
+                    'recommended vaccines to order': storage_capacity-round(fair_amount, 0),
                     'capacity': storage_capacity,
                     'fill_percentage': round((fair_amount / storage_capacity * 100 if storage_capacity > 0 else 0), 2)
                 })
+
         return {
             'available_materials': available_materials,
             'total_storage': total_storage,
             'total_requested': total_requested,
             'allocations': results
         }
-    
-    def get_result(self, acc):
-        # Calculate fair distribution
-        result = self.calculate_output()
-        output = "Not found"
-        # Save only the recommended vaccines to order for each company
-        print(result)
-        for allocation in result['allocations']:
-            print(allocation)
-            receiver = allocation['receiver']
-            recommended_vaccines = round(allocation['recommended vaccines to order'])
-            if allocation['receiver'] == acc:
-                output = round(allocation['recommended vaccines to order'])
-            # Save the recommended vaccines to order for each company
-            self.add_company_data([receiver], receiver, 'recommended_vaccines_to_order', recommended_vaccines)
 
-        return output
+    # def export_contracts_to_csv(self, output_filename='ledger_Contracts.csv'):
+    #     """
+    #     Export contracts data to a file with .csv extension
+
+    #     Args:
+    #         output_filename: The name of the output file (default: ledger_Contracts.csv)
+    #     """
+    #     # Read data from the existing contracts CSV file
+    #     contracts_data = []
+    #     try:
+    #         with open(self.contracts_filename, mode='r', newline='') as file:
+    #             reader = csv.reader(file)
+    #             header = next(reader)  # Get header
+    #             contracts_data.append(header)  # Add header to data
+    #             for row in reader:
+    #                 contracts_data.append(row)
+    #     except FileNotFoundError:
+    #         # If the contracts file doesn't exist, use the default header
+    #         contracts_data.append(['timestamp', 'labels', 'Supplier', 'Receiver', 'amount', 'Priority'])
+
+    #     # Write data to the .csv file
+    #     with open(output_filename, mode='w', newline='') as file:
+    #         writer = csv.writer(file)
+    #         for row in contracts_data:
+    #             writer.writerow(row)
+    #     print(f"Contracts data exported to {output_filename}")
     
 
 
@@ -283,12 +294,6 @@ def get_company_contracts():
     result = ledger.get_company_contract(account, company, supplier, receiver)
     return jsonify({"data": result}), 200
 
-@app.route('/get_result', methods=['GET'])
-def get_result():
-    account = request.args.get('account')
-    result = ledger.get_result(account)
-    return jsonify({"recommended vaccines": result}), 200
-
 
 @app.route('/simulate_distribution', methods=['GET'])
 def simulate_distribution():
@@ -306,14 +311,16 @@ def simulate_distribution():
     ledger.add_company_contract(['A', 'C'], 'A', 'C', 'vaccines', 200)  # A contracts with C for 100 vaccines
 
     # Calculate fair distribution
-    result = ledger.calculate_output()
+    result = ledger.calculate_fair_distribution()
 
     # Save only the recommended vaccines to order for each company
     for allocation in result['allocations']:
         receiver = allocation['receiver']
-        recommended_vaccines = round(allocation['recommended vaccines to order from others'])
+        recommended_vaccines = round(allocation['recommended vaccines to order'])
         # Save the recommended vaccines to order for each company
-        ledger.add_company_data([receiver], receiver, 'recommended_vaccines_to_order from others', recommended_vaccines)
+        ledger.add_company_data([receiver], receiver, 'recommended_vaccines_to_order', recommended_vaccines)
+
+    print(ledger.get_company_data(account='B', search_parameter='recommended_vaccines_to_order'))
 
     return jsonify(result), 200
 
@@ -326,7 +333,7 @@ def visualize():
         return "Please specify a company parameter (A, B, or C)", 400
 
     # Calculate distribution data
-    result = ledger.calculate_output()
+    result = ledger.calculate_fair_distribution()
 
     # Filter allocations based on company
     filtered_allocations = []
@@ -402,8 +409,8 @@ def visualize():
                             backgroundColor: 'rgba(153, 102, 255, 0.6)',
                         }},
                         {{
-                            label: 'Recommended vaccines to order from others',
-                            data: allocations.map(a => a["recommended vaccines to order from others"]),
+                            label: 'Recommended to Order',
+                            data: allocations.map(a => a["recommended vaccines to order"]),
                             backgroundColor: 'rgba(255, 99, 132, 0.6)',
                         }}
                     ]
@@ -437,7 +444,7 @@ def visualize():
             resource_summary = f"""
                 <p>Your storage capacity: <strong>{company_allocation['capacity']}</strong></p>
                 <p>Vaccines you requested: <strong>{company_allocation['requested']}</strong></p>
-                <p>Recommended vaccines to order from others: <strong>{company_allocation['recommended vaccines to order from others']}</strong></p>
+                <p>Recommended vaccines to order: <strong>{company_allocation['recommended vaccines to order']}</strong></p>
                 <p>Your storage fill percentage: <strong>{company_allocation['fill_percentage']}%</strong></p>
             """
 
@@ -453,7 +460,7 @@ def visualize():
                 const companyChart = new Chart(ctx, {{
                     type: 'bar',
                     data: {{
-                        labels: ['Vaccines and Co'],
+                        labels: ['Your Company'],
                         datasets: [
                             {{
                                 label: 'Requested Vaccines',
@@ -466,8 +473,8 @@ def visualize():
                                 backgroundColor: 'rgba(153, 102, 255, 0.6)',
                             }},
                             {{
-                                label: 'Recommended vacines to Order',
-                                data: [companyData["recommended vaccines to order from others"]],
+                                label: 'Recommended to Order',
+                                data: [companyData["recommended vaccines to order"]],
                                 backgroundColor: 'rgba(255, 99, 132, 0.6)',
                             }}
                         ]
@@ -494,7 +501,7 @@ def visualize():
             </script>
             """
         else:
-            resource_summary = "<p>No data available for Vaccines and Co</p>"
+            resource_summary = "<p>No data available for your company</p>"
             charts = ""
 
     return html.format(

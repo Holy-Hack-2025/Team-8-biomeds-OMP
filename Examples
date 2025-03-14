@@ -1,3 +1,4 @@
+POSTMAN 
 
 http://192.168.28.139:8000/
 # add company data
@@ -33,8 +34,7 @@ http://192.168.28.139:8000/
 
 
 # get examples
-get_company_data?account=acc1&search=stock
-get_company_data?account=acc2&search=stock
+get_company_data?account=B&company=B&search=storage
 
 # get contract
 get_company_contract?account=acc1&supplier=acc1&receiver=acc2
