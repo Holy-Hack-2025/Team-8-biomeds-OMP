@@ -2,6 +2,7 @@ import csv
 import datetime
 import os
 from flask import Flask, request, jsonify
+import json
 
 app = Flask(__name__)
 
@@ -321,6 +322,192 @@ def simulate_distribution():
     print(ledger.get_company_data(account='B', search_parameter='recommended_vaccines_to_order'))
 
     return jsonify(result), 200
+
+
+@app.route('/visualize', methods=['GET'])
+def visualize():
+    # Get company parameter from request
+    company = request.args.get('company')
+    if not company:
+        return "Please specify a company parameter (A, B, or C)", 400
+
+    # Calculate distribution data
+    result = ledger.calculate_fair_distribution()
+
+    # Filter allocations based on company
+    filtered_allocations = []
+    for allocation in result['allocations']:
+        if company == 'A' or company == allocation['receiver']:
+            filtered_allocations.append(allocation)
+
+    # Create HTML with embedded Chart.js visualization
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Vaccine Distribution Visualization - Company {company}</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 20px; }}
+            .chart-container {{ width: 80%; margin: 20px auto; }}
+            .data-card {{
+                background-color: #f5f5f5;
+                border-radius: 5px;
+                padding: 15px;
+                margin: 15px 0;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }}
+            h2 {{ color: #333; }}
+        </style>
+    </head>
+    <body>
+        <h1>Vaccine Distribution Dashboard - Company {company}</h1>
+
+        <div class="data-card">
+            <h2>Resource Summary</h2>
+            {resource_summary}
+        </div>
+
+        {charts}
+    </body>
+    </html>
+    """
+
+    # Create different content based on company
+    if company == 'A':
+        resource_summary = f"""
+            <p>Your available materials: <strong>{result['available_materials']}</strong></p>
+            <p>Total Storage Capacity of partners: <strong>{result['total_storage']}</strong></p>
+            <p>Total Requested Vaccines from partners: <strong>{result['total_requested']}</strong></p>
+        """
+
+        charts = f"""
+        <div class="chart-container">
+            <canvas id="distributionChart"></canvas>
+        </div>
+
+        <script>
+            // Parse allocation data
+            const allocations = {json.dumps(filtered_allocations)};
+
+            // Create chart showing distribution
+            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+            const distributionChart = new Chart(distributionCtx, {{
+                type: 'bar',
+                data: {{
+                    labels: allocations.map(a => 'Company ' + a.receiver),
+                    datasets: [
+                        {{
+                            label: 'Requested Vaccines',
+                            data: allocations.map(a => a.requested),
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        }},
+                        {{
+                            label: 'Capacity',
+                            data: allocations.map(a => a.capacity),
+                            backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                        }},
+                        {{
+                            label: 'Recommended to Order',
+                            data: allocations.map(a => a["recommended vaccines to order"]),
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        }}
+                    ]
+                }},
+                options: {{
+                    responsive: true,
+                    plugins: {{
+                        title: {{
+                            display: true,
+                            text: 'Vaccine Distribution to Partner Companies'
+                        }}
+                    }},
+                    scales: {{
+                        y: {{
+                            beginAtZero: true,
+                            title: {{
+                                display: true,
+                                text: 'Number of Vaccines'
+                            }}
+                        }}
+                    }}
+                }}
+            }});
+        </script>
+        """
+    else:
+        # For companies B or C, only show their own data
+        company_allocation = next((a for a in result['allocations'] if a['receiver'] == company), None)
+
+        if company_allocation:
+            resource_summary = f"""
+                <p>Your storage capacity: <strong>{company_allocation['capacity']}</strong></p>
+                <p>Vaccines you requested: <strong>{company_allocation['requested']}</strong></p>
+                <p>Recommended vaccines to order: <strong>{company_allocation['recommended vaccines to order']}</strong></p>
+                <p>Your storage fill percentage: <strong>{company_allocation['fill_percentage']}%</strong></p>
+            """
+
+            charts = f"""
+            <div class="chart-container">
+                <canvas id="companyChart"></canvas>
+            </div>
+
+            <script>
+                const companyData = {json.dumps(company_allocation)};
+
+                const ctx = document.getElementById('companyChart').getContext('2d');
+                const companyChart = new Chart(ctx, {{
+                    type: 'bar',
+                    data: {{
+                        labels: ['Your Company'],
+                        datasets: [
+                            {{
+                                label: 'Requested Vaccines',
+                                data: [companyData.requested],
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            }},
+                            {{
+                                label: 'Storage Capacity',
+                                data: [companyData.capacity],
+                                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                            }},
+                            {{
+                                label: 'Recommended to Order',
+                                data: [companyData["recommended vaccines to order"]],
+                                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                            }}
+                        ]
+                    }},
+                    options: {{
+                        responsive: true,
+                        plugins: {{
+                            title: {{
+                                display: true,
+                                text: 'Your Vaccine Distribution Data'
+                            }}
+                        }},
+                        scales: {{
+                            y: {{
+                                beginAtZero: true,
+                                title: {{
+                                    display: true,
+                                    text: 'Number of Vaccines'
+                                }}
+                            }}
+                        }}
+                    }}
+                }});
+            </script>
+            """
+        else:
+            resource_summary = "<p>No data available for your company</p>"
+            charts = ""
+
+    return html.format(
+        company=company,
+        resource_summary=resource_summary,
+        charts=charts
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
