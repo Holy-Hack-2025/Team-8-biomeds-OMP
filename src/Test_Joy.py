@@ -6,7 +6,7 @@ class Ledger:
     def __init__(self, filename='ledger.csv'):
         # Extract the base name from the input filename (without extension)
         base_filename = os.path.splitext(filename)[0]
-        
+
         # Create new filenames based on the base name
         self.data_filename = f"{base_filename}_Data.csv"
         self.contracts_filename = f"{base_filename}_Contracts.csv"
@@ -46,27 +46,34 @@ class Ledger:
             writer = csv.writer(file)
             writer.writerow(header)
 
-    def add_companydata(self, labels, account, parameter, amount):
+    def add_companydata(self, account, parameter, amount):
+        labels = set(account)
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        with open(self.filename, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([timestamp, labels, account, description, amount])
+
+def add_companydata(self, labels, account, parameter, amount):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open(self.data_filename, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([timestamp, labels, account, parameter, amount])
 
-    def get_companydata(self, account=None, company = None, search_parameter=None):
-            data = "Not found"
-            with open(self.data_filename, mode='r') as file:
-                reader = csv.reader(file)
-                next(reader)  # Skip header row
-                reader = list(csv.reader(file))
-                for row in reversed(reader):
-                    timestamp, labels, acc, parameter, amount = row
-                    amount = float(amount)  # Convert amount to a float
-                    if parameter == search_parameter:
-                        if account and (account in labels):
-                             data = row
-                        else:
-                            print("No Permission")
-            return data
+def get_companydata(self, account=None, company = None, search_parameter=None):
+        data = "Not found"
+        with open(self.data_filename, mode='r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header row
+            reader = list(csv.reader(file))
+            for row in reversed(reader):
+                timestamp, labels, acc, parameter, amount = row
+                amount = float(amount)  # Convert amount to a float
+                if parameter == search_parameter:
+                    if account and (account in labels):
+                            data = row
+                    else:
+                        print("No Permission")
+        return data
     
     # def add_contract(self, account1, account2, amount_materials):
     #     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
