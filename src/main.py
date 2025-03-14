@@ -168,7 +168,7 @@ class Ledger:
             for row in reader:
                 if len(row) >= 6:
                     _, labels_str, supplier, receiver, parameter, value = row
-                    if supplier == 'A' and parameter == 'syringes':
+                    if supplier == 'A' and parameter == 'vaccines':
                         contracts.append({
                             'supplier': supplier,
                             'receiver': receiver,
@@ -202,7 +202,7 @@ class Ledger:
                 results.append({
                     'receiver': receiver,
                     'requested': requested,
-                    'recommended syringes to order': storage_capacity-round(fair_amount, 0),
+                    'recommended vaccines to order': storage_capacity-round(fair_amount, 0),
                     'capacity': storage_capacity,
                     'fill_percentage': round((fair_amount / storage_capacity * 100 if storage_capacity > 0 else 0), 2)
                 })
@@ -300,18 +300,29 @@ def simulate_distribution():
     ledger.clear_csv(ledger.contracts_filename)
 
     # Add company data
-    ledger.add_company_data(['A'], 'A', 'materials', 300)  # Company A has materials for 300 syringes
-    ledger.add_company_data(['B'], 'B', 'storage', 500)  # Company B has storage for 500 syringes
-    ledger.add_company_data(['C'], 'C', 'storage', 200)  # Company C has storage for 200 syringes
+    ledger.add_company_data(['A'], 'A', 'materials', 300)  # Company A has materials for 300 vaccines
+    ledger.add_company_data(['B'], 'B', 'storage', 500)  # Company B has storage for 500 vaccines
+    ledger.add_company_data(['C'], 'C', 'storage', 200)  # Company C has storage for 200 vaccines
 
     # Add contracts
-    ledger.add_company_contract(['A', 'B'], 'A', 'B', 'syringes', 400)  # A contracts with B for 400 syringes
-    ledger.add_company_contract(['A', 'C'], 'A', 'C', 'syringes', 200)  # A contracts with C for 100 syringes
+    ledger.add_company_contract(['A', 'B'], 'A', 'B', 'vaccines', 400)  # A contracts with B for 400 vaccines
+    ledger.add_company_contract(['A', 'C'], 'A', 'C', 'vaccines', 200)  # A contracts with C for 100 vaccines
 
     # Calculate fair distribution
     result = ledger.calculate_fair_distribution()
+
+    # Save only the recommended vaccines to order for each company
+    for allocation in result['allocations']:
+        receiver = allocation['receiver']
+        recommended_vaccines = round(allocation['recommended vaccines to order'])
+        # Save the recommended vaccines to order for each company
+        ledger.add_company_data([receiver], receiver, 'recommended_vaccines_to_order', recommended_vaccines)
+
+    print(ledger.get_company_data(account='B', search_parameter='recommended_vaccines_to_order'))
 
     return jsonify(result), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
