@@ -1,0 +1,11 @@
+
+{
+    "labels": ["acc1"],
+    "account": "acc1",
+    "parameter": "stock",
+    "amount": 100
+}
+
+
+
+get_company_data?account=acc1&search_parameter=stock

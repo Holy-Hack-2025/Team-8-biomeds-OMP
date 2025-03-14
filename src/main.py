@@ -17,7 +17,8 @@ class Ledger:
         # Create the CSV file with header if it doesn't exist
         try:
             with open(self.data_filename, mode='r') as file:
-                self.clear_csv(self.data_filename)  # file exists
+                pass
+                #self.clear_csv(self.data_filename)  # file exists
         except FileNotFoundError:
             self.create_ledger('data')
         # Create the CSV file with header if it doesn't exist
@@ -52,6 +53,7 @@ class Ledger:
 
     def add_company_data(self, labels, account, parameter, amount):
             timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            labels = set(labels)
             with open(self.data_filename, mode='a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([timestamp, labels, account, parameter, amount])
@@ -65,7 +67,10 @@ class Ledger:
             for row in reversed(reader):
                 timestamp, labels, acc, parameter, amount = row
                 amount = float(amount)  # Convert amount to a float
+                print(parameter == search_parameter)
+                print(search_parameter)
                 if parameter == search_parameter:
+
                     if account and (account in labels):
                             data = row
                     else:
@@ -97,27 +102,27 @@ ledger = Ledger()
 #base 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! This is the Ledger API.'
+    return 'Hello! This is this API.'
 
-@app.route('/add_companydata', methods=['POST'])
-def add_companydata():
+@app.route('/add_company_data', methods=['POST'])
+def add_company_data():
     data = request.json
     labels = data['labels']
     account = data['account']
     parameter = data['parameter']
     amount = data['amount']
 
-    console.log(data)
-    
-    ledger.add_companydata(labels, account, parameter, amount)
+
+    ledger.add_company_data(labels, account, parameter, amount)
     return jsonify({"message": "Data added successfully"}), 200
 
-@app.route('/get_companydata', methods=['GET'])
-def get_companydata():
+@app.route('/get_company_data', methods=['GET'])
+def get_company_data():
     account = request.args.get('account')
-    search_parameter = request.args.get('search_parameter')
+    company = request.args.get('company')
+    search = request.args.get('search')
 
-    result = ledger.get_companydata(account, search_parameter)
+    result = ledger.get_company_data(account, company, search)
     return jsonify({"data": result}), 200
 
 if __name__ == '__main__':
