@@ -1,6 +1,10 @@
 import csv
 import datetime
 import os
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
 
 class Ledger:
     def __init__(self, filename='ledger.csv'):
@@ -41,18 +45,18 @@ class Ledger:
                 header = ['timestamp', 'labels', 'account', 'parameter', 'amount']
             case "contracts":
                 filename = self.contracts_filename
-                header = ['timestamp', 'labels', 'Supplier', 'Receiver' 'amount', 'Priority']
+                header = ['timestamp', 'labels', 'Supplier', 'Receiver', 'amount', 'Priority']
         with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(header)
 
-    def add_companydata(self, labels, account, parameter, amount):
+    def add_company_data(self, labels, account, parameter, amount):
             timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             with open(self.data_filename, mode='a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([timestamp, labels, account, parameter, amount])
 
-    def get_companydata(self, account= None, company = None, search_parameter=None):
+    def get_company_data(self, account= None, company = None, search_parameter=None):
         data = "Not found"
         with open(self.data_filename, mode='r') as file:
             reader = csv.reader(file)
@@ -68,6 +72,7 @@ class Ledger:
                         print("No Permission")
         return data
     
+    
     # def add_contract(self, account1, account2, amount_materials):
     #     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     #     with open(self.filename, mode='a', newline='') as file:
@@ -82,8 +87,38 @@ class Ledger:
 
 
 # Example usage
-ledger = Ledger()
-ledger.add_companydata(set(['Account1']),'Account1', 'stock', 1000)
-print(ledger.get_companydata('Account1','Account1','stock'))
+# ledger = Ledger()
+# ledger.add_companydata(set(['Account1']),'Account1', 'stock', 1000)
+# print(ledger.get_companydata('Account1','Account1','stock'))
 # print(ledger.get_transactions('Account 1'))
-#ledger.print_ledger()
+# ledger.print_ledger()
+ledger = Ledger()
+
+#base 
+@app.route('/')
+def hello_world():
+    return 'Hello, World! This is the Ledger API.'
+
+@app.route('/add_companydata', methods=['POST'])
+def add_companydata():
+    data = request.json
+    labels = data['labels']
+    account = data['account']
+    parameter = data['parameter']
+    amount = data['amount']
+
+    console.log(data)
+    
+    ledger.add_companydata(labels, account, parameter, amount)
+    return jsonify({"message": "Data added successfully"}), 200
+
+@app.route('/get_companydata', methods=['GET'])
+def get_companydata():
+    account = request.args.get('account')
+    search_parameter = request.args.get('search_parameter')
+
+    result = ledger.get_companydata(account, search_parameter)
+    return jsonify({"data": result}), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)
