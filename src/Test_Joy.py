@@ -14,27 +14,25 @@ class Ledger:
         try:
             with open(self.data_filename, mode='r') as file:
                 self.clear_csv(self.data_filename)  # file exists
-                with open(filename, mode='w', newline='') as file:
-                    writer = csv.writer(file)
-                    header = ['timestamp', 'labels', 'account', 'parameter', 'amount']
-                    writer.writerow(header)
         except FileNotFoundError:
             self.create_ledger('data')
         # Create the CSV file with header if it doesn't exist
         try:
             with open(self.contracts_filename, mode='r') as file:
                 self.clear_csv(self.contracts_filename)  # file exists
-                with open(filename, mode='w', newline='') as file:
-                    writer = csv.writer(file)
-                    header = ['timestamp', 'labels', 'Supplier', 'Receiver' 'amount', 'Priority']
-                    writer.writerow(header)
         except FileNotFoundError:
             self.create_ledger('contracts')
 
     def clear_csv(self,filename):
         # write mode ('w') to clear its contents
+        with open(filename, mode='r', newline='') as file:
+            # Read the first line (header)
+            header = file.readline()
+
+        # Open the file in write mode to clear its content
         with open(filename, mode='w', newline='') as file:
-            pass 
+            # Write the header back to the file
+            file.write(header)
 
     def create_ledger(self, key ):
         match key:
