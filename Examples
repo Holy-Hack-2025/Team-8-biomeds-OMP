@@ -1,11 +1,17 @@
 
-
+http://192.168.28.139:8000/
 # add company data
 {
     "labels": ["acc1"],
     "account": "acc1",
     "parameter": "stock",
     "amount": 100
+}
+{
+    "labels": ["acc2"],
+    "account": "acc2",
+    "parameter": "stock",
+    "amount": 50
 }
 
 #add company contract
@@ -16,8 +22,21 @@
     "parameter": "delivery",
     "value": 200
 }
+{
+    "labels": ["acc2", "acc3"],
+    "supplier": "acc2",
+    "receiver": "acc3",
+    "parameter": "delivery",
+    "value": 500
+}
 
 
-get_company_data?account=acc1&search_parameter=stock
 
+# get examples
+get_company_data?account=acc1&search=stock
+get_company_data?account=acc2&search=stock
+
+# get contract
 get_company_contract?account=acc1&supplier=acc1&receiver=acc2
+get_company_contract?account=acc3&supplier=acc2&receiver=acc3
+get_company_contract?account=acc1&supplier=acc2&receiver=acc3

@@ -58,7 +58,7 @@ class Ledger:
                 writer = csv.writer(file)
                 writer.writerow([timestamp, labels, account, parameter, amount])
 
-    def get_company_data(self, account= None, company = None, search_parameter=None):
+    def get_company_data(self, account= None, search_parameter=None):
         data = "Not found"
         with open(self.data_filename, mode='r') as file:
             reader = csv.reader(file)
@@ -67,14 +67,13 @@ class Ledger:
             for row in reversed(reader):
                 timestamp, labels, acc, parameter, amount = row
                 amount = float(amount)  # Convert amount to a float
-                print(parameter == search_parameter)
-                print(search_parameter)
                 if parameter == search_parameter:
-
+                    print('OK')
                     if account and (account in labels):
                             data = row
+                            break
                     else:
-                        print("No Permission")
+                        data = "No Permission"
         return data
     
     def add_company_contract(self, labels, supplier, receiver, parameter, value):
@@ -131,45 +130,39 @@ class Ledger:
                             data = row
                             break
                         else:
-                            print("No Permission")
+                            data = "No Permission"
 
         return data
 
-    def export_contracts_to_csv(self, output_filename='ledger_Contracts.csv'):
-        """
-        Export contracts data to a file with .csv extension
+    # def export_contracts_to_csv(self, output_filename='ledger_Contracts.csv'):
+    #     """
+    #     Export contracts data to a file with .csv extension
 
-        Args:
-            output_filename: The name of the output file (default: ledger_Contracts.csv)
-        """
-        # Read data from the existing contracts CSV file
-        contracts_data = []
-        try:
-            with open(self.contracts_filename, mode='r', newline='') as file:
-                reader = csv.reader(file)
-                header = next(reader)  # Get header
-                contracts_data.append(header)  # Add header to data
-                for row in reader:
-                    contracts_data.append(row)
-        except FileNotFoundError:
-            # If the contracts file doesn't exist, use the default header
-            contracts_data.append(['timestamp', 'labels', 'Supplier', 'Receiver', 'amount', 'Priority'])
+    #     Args:
+    #         output_filename: The name of the output file (default: ledger_Contracts.csv)
+    #     """
+    #     # Read data from the existing contracts CSV file
+    #     contracts_data = []
+    #     try:
+    #         with open(self.contracts_filename, mode='r', newline='') as file:
+    #             reader = csv.reader(file)
+    #             header = next(reader)  # Get header
+    #             contracts_data.append(header)  # Add header to data
+    #             for row in reader:
+    #                 contracts_data.append(row)
+    #     except FileNotFoundError:
+    #         # If the contracts file doesn't exist, use the default header
+    #         contracts_data.append(['timestamp', 'labels', 'Supplier', 'Receiver', 'amount', 'Priority'])
 
-        # Write data to the .csv file
-        with open(output_filename, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            for row in contracts_data:
-                writer.writerow(row)
-
-        print(f"Contracts data exported to {output_filename}")
+    #     # Write data to the .csv file
+    #     with open(output_filename, mode='w', newline='') as file:
+    #         writer = csv.writer(file)
+    #         for row in contracts_data:
+    #             writer.writerow(row)
+    #     print(f"Contracts data exported to {output_filename}")
     
 
-# Example usage
-# ledger = Ledger()
-# ledger.add_companydata(set(['Account1']),'Account1', 'stock', 1000)
-# print(ledger.get_companydata('Account1','Account1','stock'))
-# print(ledger.get_transactions('Account 1'))
-# ledger.print_ledger()
+
 ledger = Ledger()
 
 # base 
@@ -207,10 +200,9 @@ def add_company_contract():
 @app.route('/get_company_data', methods=['GET'])
 def get_company_data():
     account = request.args.get('account')
-    company = request.args.get('company')
     search = request.args.get('search')
 
-    result = ledger.get_company_data(account, company, search)
+    result = ledger.get_company_data(account, search)
     return jsonify({"data": result}), 200
 
 # endpoint - get contract between companies

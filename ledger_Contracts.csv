@@ -1,2 +1,1 @@
-timestamp,labels,Supplier,Receiveramount,Priority
-2025-03-14 12:42:30,"['acc1', 'acc2']",acc1,acc2,delivery,200
+timestamp,labels,Supplier,Receiver,amount,Priority
